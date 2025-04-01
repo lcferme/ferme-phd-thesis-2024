@@ -35,6 +35,12 @@ def zetaslice(img):
 #-----------------------------------------------------------------------------------------------------------------------
 
 def measure_volume_fraction_from_masking(mask, radius=20):
+    """Computes volume fraction occupied  by nuclei within a region of interest (ROI). 
+    The labelled objects, i.e. the nuclei, belonging to the ROI are extended by a given
+    radius (radius) and all holes are closed to create a compact volume that is subsequently
+    eroded to fit within the ROI. 
+    Returns 
+    """
     mgpu = cle.push_zyx(mask)
     ext_mgpu = cle.extend_labels_with_maximum_radius(mgpu, radius = radius)
     ext_img = closing(cle.pull(ext_mgpu), cube(100))
@@ -133,9 +139,10 @@ def radial_distribution_function_3D(x, y, z, volMask, rMax, dr, interior_indices
 #####################################################################################################################################
 
 def order_parameter_s(directors):
+     """Computes the order parameter S for given set of neighbouring nematic axes 
+     by calculating the misalignment of each nematic axis to the average director. 
+    """
     avg_director = np.add.reduce(directors)/directors.shape[0]
-   # print('average_direction', avg_director)
-    #avg_director_hat = avg_director/np.linalg.norm(avg_director)
 
     angles = np.zeros(directors.shape[0])
     director = directors[~np.isnan(directors)]
@@ -145,11 +152,7 @@ def order_parameter_s(directors):
         theta = angle_between(nematic_director, avg_director)
         angles[i] = np.cos(theta)*np.cos(theta) #theta
 
-    #print('angles', angles)
-    #average_theta = np.nanmean(angles)
-    S = (3*np.nanmean(angles)-1)/2
-    #print("AVERAGE", np.degrees(average_theta), average_theta)
     
-   # S = (3*np.cos(average_theta)*np.cos(average_theta)-1)/2
-  #  print("S", S)
+    S = (3*np.nanmean(angles)-1)/2
+  
     return S
